@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: "Prompt", sans-serif; }
+    
+    /* Soft Shadow */
+    .soft-card {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      border-radius: 18px;
+      transition: all .25s ease;
+      backdrop-filter: blur(6px);
+    }
+    .soft-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    /* Modern Button */
+    .btn-modern {
+      background: linear-gradient(135deg,#ff8c3c,#ff5e00);
+      transition: all .2s ease-in-out;
+    }
+    .btn-modern:hover {
+      background: linear-gradient(135deg,#ff7a1c,#ff4a00);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255,115,0,0.4);
+    }
+
+    /* Input Style */
+    .form-input {
+      @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500;
+    }
+
+    /* Footer Blur */
+    .footer-glass {
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.8);
+    }
+
+    /* Fade in Animation */
+    .fade-in {
+      animation: fadeIn .6s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-orange-50 to-white pb-32">
+
+  <!-- HEADER -->
+  <header class="py-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center shadow-lg">
+    <h1 class="text-4xl font-extrabold tracking-wide drop-shadow-lg">
+      🍽️ ASL 
+    </h1>
+    <p class="mt-2 text-orange-100 text-lg">สั่งง่าย • อร่อย • ส่งตรงเวลา</p>
+  </header>
+
+  <div class="max-w-4xl mx-auto mt-6 p-6 soft-card bg-white fade-in">
+      
+    <!-- FORM -->
+    <form id="preOrderForm" onsubmit="handleFormSubmit(this); return false;">
+
+      <!-- ผู้สั่ง -->
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+          👤 ข้อมูลผู้สั่ง
+          <span class="ml-2 text-sm font-light text-gray-500">(กรอกข้อมูลให้ครบ)</span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="soft-card p-4 bg-white">
+            <label class="text-sm text-gray-600 mb-1 block">ชื่อผู้สั่ง <span class="text-red-500">*</span></label>
+            <input type="text" name="customerName" required class="form-input" placeholder="เช่น วรัญญา">
+          </div>
+
+          <div class="soft-card p-4 bg-white">
+            <label class="text-sm text-gray-600 mb-1 block">เบอร์โทร / ห้อง <span class="text-red-500">*</span></label>
+            <input type="text" name="contactInfo" required class="form-input" placeholder="เช่น 081-xxx-xxxx">
+          </div>
+        </div>
+      </section>
+
+      <!-- วันรับ -->
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-3">📅 วันที่รับอาหาร</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="soft-card p-4 bg-white">
+            <label class="text-sm text-gray-600">วันที่สั่ง</label>
+            <input type="date" id="orderDate" name="orderDate" readonly class="form-input bg-gray-100 text-gray-500 cursor-not-allowed">
+          </div>
+
+          <div class="soft-card p-4 bg-white">
+            <label class="text-sm text-gray-600">วันที่รับ <span class="text-red-500">*</span></label>
+            <input type="date" id="deliveryDate" name="deliveryDate" required class="form-input">
+          </div>
+        </div>
+      </section>
+
+      <!-- เมนู -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">🍱 เลือกเมนูที่ต้องการ</h2>
+
+        <div id="menuContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="text-center py-10 text-gray-400 animate-pulse">⏳ กำลังโหลดเมนู...</div>
+        </div>
+
+        <?!= include('MenuTemplate'); ?> 
+      </section>
+
+      <!-- หมายเหตุ -->
+      <section class="mb-8">
+        <h2 class="text-lg font-bold text-gray-800 mb-2">📝 รายละเอียดเพิ่มเติม</h2>
+        <textarea name="additionalNotes" rows="3" class="form-input soft-card" placeholder="เช่น เพิ่มผัก, เผ็ดมาก, ไม่ใส่ต้นหอม"></textarea>
+      </section>
+
+      <!-- FOOTER -->
+      <div class="fixed bottom-0 left-0 w-full footer-glass border-t shadow-[0_-4px_10px_rgba(0,0,0,0.1)] p-4 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+          
+          <div>
+            <p class="text-sm text-gray-600">ยอดรวมทั้งหมด</p>
+            <p id="totalPriceDisplay" class="text-3xl font-extrabold text-orange-600 drop-shadow-sm">0 ฿</p>
+          </div>
+
+          <button id="submitButton"
+            type="submit"
+            class="btn-modern text-white font-bold py-3 px-10 rounded-full text-lg shadow-xl">
+            ยืนยันออเดอร์
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+<script>
+/* ตั้งค่าการจัดวัน */
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const format = d => d.toISOString().split('T')[0];
+
+  document.getElementById('orderDate').value = format(today);
+  document.getElementById('deliveryDate').value = format(tomorrow);
+});
+
+/* คำนวณราคา */
+function calculateTotal() {
+  let total = 0;
+  document.querySelectorAll('.menu-item-card').forEach(card => {
+    const cb = card.querySelector('input[type="checkbox"]');
+    if (cb && cb.checked) {
+      const price = parseFloat(card.dataset.price || 0);
+      const qty = parseInt(card.querySelector('input[type="number"]').value || 1);
+      total += price * qty;
+    }
+  });
+
+  document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + " ฿";
+  return total;
+}
+
+document.addEventListener("change", () => calculateTotal());
+
+/* ส่งฟอร์ม */
+function handleFormSubmit(form) {
+  const total = calculateTotal();
+  if (total <= 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "ยังไม่ได้เลือกเมนู",
+      text: "กรุณาเลือกเมนูอย่างน้อย 1 รายการ",
+      confirmButtonColor: "#ff6600"
+    });
+    return;
+  }
+
+  const formData = {
+    customerName: form.customerName.value,
+    contactInfo: form.contactInfo.value,
+    orderDate: form.orderDate.value,
+    deliveryDate: form.deliveryDate.value,
+    additionalNotes: form.additionalNotes.value,
+    totalPrice: total,
+    items: []
+  };
+
+  document.querySelectorAll(".menu-item-card").forEach(card => {
+    const cb = card.querySelector("input[type='checkbox']");
+    if (cb.checked) {
+      const id = cb.value;
+      formData.items.push({
+        name: card.dataset.name,
+        quantity: card.querySelector("input[type='number']").value,
+        spiciness: card.querySelector(`input[name="spicy_${id}"]:checked`)?.value || "-"
+      });
+    }
+  });
+
+  google.script.run
+    .withSuccessHandler(res => {
+      Swal.fire({
+        icon: "success",
+        title: "สั่งอาหารสำเร็จ!",
+        html: `<b>รหัสออเดอร์:</b> ${res.orderId}<br><b>ยอดรวม:</b> ${res.totalPrice} ฿`,
+        confirmButtonColor: "#ff6600"
+      }).then(() => location.reload());
+    })
+    .withFailureHandler(err => {
+      Swal.fire("เกิดข้อผิดพลาด", err.message, "error");
+    })
+    .processForm(formData);
+}
+
+</script>
+
+</body>
+</html>
