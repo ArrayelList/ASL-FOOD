@@ -1,0 +1,72 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    google.script.run.withSuccessHandler(renderMenu).getMenuData();
+  });
+
+  function renderMenu(menuData) {
+    const container = document.getElementById('menuContainer');
+    container.innerHTML = ''; 
+
+    if (menuData.length === 0) {
+       container.innerHTML = '<div class="text-center text-red-500">ไม่พบข้อมูลเมนู หรือการเชื่อมต่อผิดพลาด</div>';
+       return;
+    }
+    
+    menuData.forEach(item => {
+      const cardHtml = `
+        <div class="menu-item-card relative flex flex-row items-start p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all" 
+             data-name="${item.name}" 
+             data-price="${item.price}">
+          
+          <div class="w-24 h-24 flex-shrink-0 mr-4">
+             <img src="${item.imageUrl}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'" class="w-full h-full object-cover rounded-lg bg-gray-200">
+          </div>
+          
+          <div class="flex-grow">
+            <div class="flex justify-between items-start">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" value="${item.id}" onchange="toggleOptions(this)" class="w-6 h-6 text-orange-600 rounded focus:ring-orange-500 border-gray-300 transition">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg leading-tight">${item.name}</h3>
+                        <span class="text-orange-600 font-bold">${item.price} ฿</span>
+                    </div>
+                </label>
+            </div>
+
+            <div id="options_${item.id}" class="hidden mt-3 p-3 bg-orange-50 rounded-lg border border-orange-100 text-sm animate-fade-in">
+                
+                <div class="flex items-center mb-2">
+                    <label class="mr-2 font-semibold text-gray-700">จำนวน:</label>
+                    <input type="number" id="qty_${item.id}" value="1" min="1" class="w-16 p-1 text-center border rounded focus:ring-orange-500">
+                </div>
+
+                ${item.hasSpicy ? `
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span class="font-semibold text-gray-700 mr-1">ความเผ็ด:</span>
+                    <label class="inline-flex items-center"><input type="radio" name="spicy_${item.id}" value="เผ็ด" class="text-red-600" checked><span class="ml-1">เผ็ด</span></label>
+                    <label class="inline-flex items-center"><input type="radio" name="spicy_${item.id}" value="เผ็ดน้อย" class="text-orange-500"><span class="ml-1">เผ็ดน้อย</span></label>
+                    <label class="inline-flex items-center"><input type="radio" name="spicy_${item.id}" value="ไม่เผ็ด" class="text-green-600"><span class="ml-1">ไม่เผ็ด</span></label>
+                </div>
+                ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      container.innerHTML += cardHtml;
+    });
+  }
+
+  // เปิด/ปิด ตัวเลือกเมื่อติ๊ก Checkbox
+  function toggleOptions(checkbox) {
+    const optionsDiv = document.getElementById(`options_${checkbox.value}`);
+    const qtyInput = document.getElementById(`qty_${checkbox.value}`);
+    
+    if (checkbox.checked) {
+        optionsDiv.classList.remove('hidden');
+        qtyInput.value = 1; 
+    } else {
+        optionsDiv.classList.add('hidden');
+    }
+    // คำนวณราคาจะทำงานอัตโนมัติผ่าน Event Listener ใน Index.html
+  }
+</script>
